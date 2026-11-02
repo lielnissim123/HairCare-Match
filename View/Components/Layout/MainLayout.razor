@@ -1,23 +1,26 @@
-﻿@inherits LayoutComponentBase
+﻿@using View.Components.Shared
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="page" dir="rtl">
+    <!-- סרגל עליון צמוד למעלה -->
+    <header class="navbar navbar-expand-sm navbar-light border-bottom px-4 py-3 sticky-top" style="background-color: #fff5f7;">
+        <div class="container-fluid">
+            <!-- הלוגו המשותף שלנו -->
+            <Logo />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <!-- קישורי הניווט -->
+            <nav class="nav gap-3 align-items-center">
+                <NavLink class="nav-link fw-semibold" href="" Match="NavLinkMatch.All" style="color: #4a3e4e;">דף הבית</NavLink>
+                <NavLink class="nav-link fw-semibold" href="login" style="color: #4a3e4e;">התחברות</NavLink>
+                <NavLink class="nav-link btn btn-primary px-3 text-dark fw-semibold" href="register">הרשמה</NavLink>
+            </nav>
         </div>
+    </header>
 
+    <!-- תוכן הדפים השונים יופיע כאן אוטומטית -->
+    <main>
         <article class="content px-4">
             @Body
         </article>
     </main>
-</div>
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
 </div>

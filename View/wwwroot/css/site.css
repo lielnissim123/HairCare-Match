@@ -1,0 +1,17 @@
+﻿/* צבעים בסיסיים לפרויקט */
+:root {
+    --bs-primary: #e879f9; /* הצבע הוורוד הפסטלי הראשי */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fffafc;
+    color: #4a3e4e;
+}
+
+/* עיצוב כרטיסים בסגנון רך */
+.card-soft-pink {
+    background-color: #ffffff;
+    border: 1px solid #fce7f3;
+    border-radius: 1rem;
+}

@@ -1,6 +1,111 @@
 @API_HostAddress = http://localhost:5267
 
-GET {{API_HostAddress}}/weatherforecast/
+###
+
+# ===== משתמשים =====
+
+# כל המשתמשים
+GET {{API_HostAddress}}/api/users
 Accept: application/json
+
+###
+
+# משתמש לפי מזהה
+GET {{API_HostAddress}}/api/users/2
+Accept: application/json
+
+###
+
+# האם שם משתמש קיים (צפוי: אמת)
+GET {{API_HostAddress}}/api/users/exists/admin1
+
+###
+
+# האם שם משתמש קיים
+GET {{API_HostAddress}}/api/users/exists/dana.cohen
+
+###
+
+# האם אימייל קיים
+GET {{API_HostAddress}}/api/users/email-exists/admin1@haircare3.com
+
+###
+
+# ספירת משתמשים לפי תפקיד
+GET {{API_HostAddress}}/api/users/count-by-role
+
+###
+
+# הוספת משתמש בדיקה (תפקיד ברירת מחדל: User)
+POST {{API_HostAddress}}/api/users
+Content-Type: application/json
+
+{
+  "username": "test.user56",
+  "email": "test.user256@example.com",
+  "password": "Test1234556"
+}
+
+###
+
+# הוספת משתמש עם תפקיד אדמין
+POST {{API_HostAddress}}/api/users?roleName=SuperAdmin
+Content-Type: application/json
+
+{
+  "username": "super.admin36",
+  "email": "admin1@haircare336.com",
+  "password": "Admin123636"
+}
+###
+
+# התחברות עם פרטים נכונים (צפוי: 200 והמשתמש)
+POST {{API_HostAddress}}/api/users/login
+Content-Type: application/json
+
+{
+  "username": "super.admin3",
+  "password": "Admin12363"
+}
+
+###
+
+# התחברות עם סיסמה שגויה (צפוי: 401)
+POST {{API_HostAddress}}/api/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "wrong"
+}
+
+###
+
+# הבקשות הבאות פועלות על משתמש הבדיקה.
+# לפני ההרצה, להחליף את 11 במזהה (Id) שהוחזר בהוספת המשתמש.
+
+# שינוי תפקיד
+PUT {{API_HostAddress}}/api/users/10/role?roleName=SuperAdmin
+
+###
+
+# עדכון סיסמה
+PUT {{API_HostAddress}}/api/users/10/password
+Content-Type: application/json
+
+"NewPass1236"
+
+###
+
+# עדכון אימייל
+PUT {{API_HostAddress}}/api/users/10/email
+Content-Type: application/json
+
+"new.test.user5@example.com"
+
+###
+
+# מחיקת משתמש הבדיקה
+DELETE {{API_HostAddress}}/api/users/10
 
 ###

@@ -1,0 +1,73 @@
+﻿@page "/login"
+@inject NavigationManager Navigation
+@using View.Components.Shared
+
+<PageTitle>התחברות · HairCare Match</PageTitle>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+
+            <div class="card card-soft-pink p-4 p-md-5 shadow-sm border-0">
+                <div class="card-body p-0">
+                    <h1 class="h2 fw-bold mb-2" style="color: #4a3e4e;">כניסה ל-<span style="color: #e879f9;">HairCare Match</span></h1>
+                    <p class="text-secondary mb-4">התחילי את שגרת טיפוח השיער שלך בקלות 🌸</p>
+
+                    <form novalidate>
+                        <!-- שימוש ברכיב ה-Field המשותף -->
+                        <Field Id="login-username" Label="שם משתמש" Name="username" @bind-Value="username" />
+                        <Field Id="login-password" Label="סיסמה" Name="password" Type="password" Dir="ltr" @bind-Value="password" />
+
+                        <!-- הודעת שגיאה במידה והשדות ריקים -->
+                        @if (errorMessage != null)
+                        {
+                            <div class="alert alert-danger mt-3" role="alert">@errorMessage</div>
+                        }
+
+                        <!-- כפתור כניסה עם מצב טעינה -->
+                        <button class="btn btn-primary btn-lg w-100 mt-3 text-dark fw-semibold" type="button"
+                                disabled="@isBusy" @onclick="LoginAsync">
+                            @if (isBusy)
+                            {
+                                <span>בודקים...</span>
+                            }
+                            else
+                            {
+                                <span>כניסה</span>
+                            }
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-center mt-4">
+                אין לך חשבון עדיין? <a class="fw-bold text-decoration-none" href="register" style="color: #e879f9;">הצטרפי עכשיו</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? username;
+    private string? password;
+    private string? errorMessage;
+    private bool isBusy;
+
+    private async Task LoginAsync()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "יש למלא שם משתמש וסיסמה.";
+            return;
+        }
+
+        isBusy = true;
+        await Task.Delay(800); // סימולציית בדיקה
+        isBusy = false;
+
+        Navigation.NavigateTo("");
+    }
+}
