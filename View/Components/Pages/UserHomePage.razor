@@ -1,13 +1,91 @@
 ﻿@page "/user-home"
 @using View.Services
+@using View.Components.Shared
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* מציגים את התוכן רק אם המשתמש מחובר והוא User *@
+<PageTitle>האזור האישי · HairCare Match</PageTitle>
+
+@* דף ראשי למשתמש רגיל (User): מציג סקירה אישית, פרופיל שיער, המלצות וגישה לפעולות באתר *@
 @if (Session.IsLoggedIn && Session.RoleName == "User")
 {
-    <h3>האזור האישי - משתמשת רשומה (User)</h3>
-    <p>ברוכה הבאה לאזור האישי שלך. כאן תמצאי פרופיל שיער, המלצות מותאמות וטיפולים שמורים[cite: 3].</p>
+    <div class="container py-4">
+        <div class="inner-page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="role-pill mb-2">משתמשת רשומה · User</span>
+                    <h1 class="h3 inner-page-title">האזור האישי שלך ב-HairCare Match</h1>
+                    <p class="text-secondary mb-0">ברוכה הבאה! כאן תוכלי לראות את מצב שגרת השיער שלך ולעבור לפעולות במערכת.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/content/treatments" class="btn btn-primary text-dark fw-semibold">הוספת טיפול / שגרה</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- כרטיסי נתונים לדוגמה -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="סוג שיער מוגדר"
+                               Value="גלי · נקבוביות בינונית"
+                               Description="נתוני פרופיל לדוגמה להתאמת מוצרים ושגרה."
+                               BadgeText="פרופיל" />
+            </div>
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="טיפולים שמורים"
+                               Value="4"
+                               Description="מסכות, שמנים ותכשירים שנשמרו ברשימה שלך."
+                               BadgeText="שמורים"
+                               ActionText="צפייה בטיפולים"
+                               ActionHref="/content/treatments" />
+            </div>
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="התאמה אחרונה"
+                               Value="92%"
+                               Description="שגרת לחות והזנה מותאמת לשיער יבש בקצוות."
+                               BadgeText="המלצה" />
+            </div>
+        </div>
+
+        <!-- טבלת שגרה לדוגמה -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">שגרת הטיפוח השבועית שלי (נתונים לדוגמה)</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>יום</th>
+                                <th>שלב בטיפול</th>
+                                <th>מוצר לדוגמה</th>
+                                <th>סטטוס</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ראשון</td>
+                                <td>ניקוי והזנה</td>
+                                <td>שמפו עדין ללא סולפטים</td>
+                                <td><span class="badge bg-success-subtle text-success">הושלם</span></td>
+                            </tr>
+                            <tr>
+                                <td>רביעי</td>
+                                <td>שיקום עמוק</td>
+                                <td>מסכת לחות משקמת</td>
+                                <td><span class="badge bg-warning-subtle text-dark">מתוכנן</span></td>
+                            </tr>
+                            <tr>
+                                <td>שישי</td>
+                                <td>הגנה וברק</td>
+                                <td>סרום קצוות מזין</td>
+                                <td><span class="badge bg-light text-dark border">ממתין</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {

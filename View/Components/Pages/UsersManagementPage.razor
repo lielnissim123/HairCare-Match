@@ -1,0 +1,107 @@
+﻿@page "/admin/users"
+@using View.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+<PageTitle>ניהול משתמשים · HairCare Match</PageTitle>
+
+@* דף ניהול משתמשים (מוגן ל-SuperAdmin): מציג טבלת משתמשים וטופס עריכת פרטים לדוגמה *@
+@if (Session.IsLoggedIn && Session.RoleName == "SuperAdmin")
+{
+    <div class="container py-4">
+        <div class="inner-page-header mb-4">
+            <span class="role-pill mb-2">מוגן ל-SuperAdmin</span>
+            <h1 class="h3 inner-page-title">רשימת משתמשים ועריכת פרטים</h1>
+            <p class="text-secondary mb-0">צפייה במשתמשי המערכת ועריכת תפקיד/סטטוס (תצוגה עם נתונים לדוגמה).</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">משתמשים במערכת</h2>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>שם משתמש</th>
+                                        <th>אימייל</th>
+                                        <th>תפקיד</th>
+                                        <th>סטטוס</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>maya_k</td>
+                                        <td>maya@example.com</td>
+                                        <td><span class="role-pill">User</span></td>
+                                        <td><span class="badge bg-success-subtle text-success">פעיל</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>dana_editor</td>
+                                        <td>dana@example.com</td>
+                                        <td><span class="role-pill">ContentManager</span></td>
+                                        <td><span class="badge bg-success-subtle text-success">פעיל</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>admin_main</td>
+                                        <td>admin@example.com</td>
+                                        <td><span class="role-pill">SuperAdmin</span></td>
+                                        <td><span class="badge bg-success-subtle text-success">פעיל</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card card-soft-pink border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">עריכת פרטי משתמש (לדוגמה)</h2>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">שם משתמש</label>
+                            <input type="text" class="form-control" value="maya_k" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">תפקיד</label>
+                            <select class="form-select">
+                                <option selected>User</option>
+                                <option>ContentManager</option>
+                                <option>SuperAdmin</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary text-dark fw-semibold w-100">
+                            שמירת שינויים (תצוגה)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync();
+
+            if (!Session.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (Session.RoleName != "SuperAdmin")
+            {
+                Navigation.NavigateTo("/unauthorized");
+                return;
+            }
+
+            StateHasChanged();
+        }
+    }
+}

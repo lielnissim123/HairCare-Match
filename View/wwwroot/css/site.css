@@ -15,3 +15,35 @@ body {
     border: 1px solid #fce7f3;
     border-radius: 1rem;
 }
+
+/* מחלקות עיצוב משותפות לדפים הפנימיים של HairCare Match */
+.inner-page-header {
+    background: linear-gradient(135deg, #fff5f7 0%, #fdf4ff 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(232, 121, 249, 0.2);
+}
+
+.inner-page-title {
+    color: #4a3e4e;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.role-pill {
+    display: inline-block;
+    background-color: #fdf4ff;
+    color: #a21caf;
+    border: 1px solid #f0abfc;
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.stat-value {
+    color: #4a3e4e;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}

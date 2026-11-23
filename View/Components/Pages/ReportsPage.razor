@@ -1,0 +1,93 @@
+﻿@page "/admin/reports"
+@using View.Services
+@using View.Components.Shared
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+<PageTitle>דוחות מערכת · HairCare Match</PageTitle>
+
+@* דף דוחות (מוגן ל-SuperAdmin): מציג מדדי שימוש וסיכומי מערכת עם נתונים לדוגמה *@
+@if (Session.IsLoggedIn && Session.RoleName == "SuperAdmin")
+{
+    <div class="container py-4">
+        <div class="inner-page-header mb-4">
+            <span class="role-pill mb-2">מוגן ל-SuperAdmin</span>
+            <h1 class="h3 inner-page-title">דוחות וסטטיסטיקות מערכת</h1>
+            <p class="text-secondary mb-0">סיכום מדדים לדוגמה לצורך בדיקת תצוגה ופריסה רספונסיבית.</p>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="כניסות החודש"
+                               Value="412"
+                               Description="סה״כ כניסות משתמשים רשומים (נתוני דוגמה)."
+                               BadgeText="חודשי" />
+            </div>
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="הטיפולים הנצפים ביותר"
+                               Value="18"
+                               Description="פריטים שזכו למירב הצפיות החודש."
+                               BadgeText="פופולרי" />
+            </div>
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="שלבי פיתוח שהושלמו"
+                               Value="9 / 10"
+                               Description="שלב עיצוב דפים פנימיים בתצוגה."
+                               BadgeText="התקדמות" />
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">טבלת סיכום דוחות (נתונים לדוגמה)</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>שם הדוח</th>
+                                <th>תקופה</th>
+                                <th>סיכום קצר</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>התפלגות משתמשים לפי תפקיד</td>
+                                <td>נובמבר</td>
+                                <td>רוב המשתמשים הם User, לצד ContentManager ו-SuperAdmin</td>
+                            </tr>
+                            <tr>
+                                <td>התפלגות טיפולים לפי סוג שיער</td>
+                                <td>נובמבר</td>
+                                <td>הובלה לקטגוריית לחות והזנה לשיער יבש וגלי</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync();
+
+            if (!Session.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (Session.RoleName != "SuperAdmin")
+            {
+                Navigation.NavigateTo("/unauthorized");
+                return;
+            }
+
+            StateHasChanged();
+        }
+    }
+}

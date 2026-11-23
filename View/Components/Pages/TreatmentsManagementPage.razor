@@ -1,0 +1,103 @@
+﻿@page "/content/treatments"
+@using View.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+<PageTitle>ניהול טיפולים ופריטים · HairCare Match</PageTitle>
+
+@* דף הוספה ועריכה של פריט (מוגן ל-ContentManager): טופס הוספת טיפול ורשימת פריטים לדוגמה *@
+@if (Session.IsLoggedIn && Session.RoleName == "ContentManager")
+{
+    <div class="container py-4">
+        <div class="inner-page-header mb-4">
+            <span class="role-pill mb-2">מוגן ל-ContentManager</span>
+            <h1 class="h3 inner-page-title">הוספה ועריכה של פריטי טיפול</h1>
+            <p class="text-secondary mb-0">הזנת טיפול חדש לקטלוג וצפייה בפריטים קיימים (נתונים לדוגמה).</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-5">
+                <div class="card card-soft-pink border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">הוספת פריט חדש</h2>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">שם הטיפול</label>
+                            <input type="text" class="form-control" placeholder="למשל: מסכת הזנה לאורך השיער" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">סוג שיער</label>
+                            <select class="form-select">
+                                <option>יבש</option>
+                                <option>גלי / מתולתל</option>
+                                <option>צבוע / מובהר</option>
+                                <option>רגיל</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">תיאור קצר</label>
+                            <textarea class="form-control" rows="3" placeholder="תיאור הטיפול והיתרונות שלו..."></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary text-dark fw-semibold w-100">
+                            שמירת פריט (תצוגה)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">פריטים קיימים לדוגמה</h2>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>שם הפריט</th>
+                                        <th>סוג שיער</th>
+                                        <th>פעולה</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>מסכת לחות אבוקדו</td>
+                                        <td>יבש / מתולתל</td>
+                                        <td><button type="button" class="btn btn-sm btn-outline-secondary">עריכה</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>סרום הגנה מחום</td>
+                                        <td>כל סוגי השיער</td>
+                                        <td><button type="button" class="btn btn-sm btn-outline-secondary">עריכה</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync();
+
+            if (!Session.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (Session.RoleName != "ContentManager")
+            {
+                Navigation.NavigateTo("/unauthorized");
+                return;
+            }
+
+            StateHasChanged();
+        }
+    }
+}

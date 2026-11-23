@@ -1,13 +1,82 @@
 ﻿@page "/contentmanager-home"
 @using View.Services
+@using View.Components.Shared
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* מציגים את התוכן רק אם המשתמש מחובר והוא ContentManager *@
+<PageTitle>ניהול תוכן · HairCare Match</PageTitle>
+
+@* דף ראשי למנהל תוכן (ContentManager): מציג מצב תכנים, המלצות וגישה להוספה ועריכה של טיפולים *@
 @if (Session.IsLoggedIn && Session.RoleName == "ContentManager")
 {
-    <h3>ניהול תוכן - מנהל תוכן (ContentManager)</h3>
-    <p>ברוך הבא לניהול התוכן. מכאן ניתן להוסיף, לערוך ולאשר טיפולים וביקורות[cite: 3].</p>
+    <div class="container py-4">
+        <div class="inner-page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="role-pill mb-2">מנהל תוכן · ContentManager</span>
+                    <h1 class="h3 inner-page-title">סביבת ניהול תוכן וטיפולי שיער</h1>
+                    <p class="text-secondary mb-0">הוספה, עריכה וארגון של טיפולים, שגרות והמלצות באתר.</p>
+                </div>
+                <div>
+                    <a href="/content/treatments" class="btn btn-primary text-dark fw-semibold">+ הוספה / עריכת פריט</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="טיפולים מפורסמים"
+                               Value="42"
+                               Description="טיפולי שיער זמינים למשתמשים באתר."
+                               BadgeText="פעיל"
+                               ActionText="ניהול פריטים"
+                               ActionHref="/content/treatments" />
+            </div>
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="טיוטות לבדיקה"
+                               Value="7"
+                               Description="פריטי תוכן שממתינים לעריכה או אישור."
+                               BadgeText="טיוטה"
+                               ActionText="עריכת טיוטות"
+                               ActionHref="/content/treatments" />
+            </div>
+            <div class="col-12 col-md-4">
+                <DashboardCard Title="קטגוריות שיער"
+                               Value="6"
+                               Description="יובש, צבע, נפח, ברק, קרקפת וחיזוק."
+                               BadgeText="קטלוג" />
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">פריטי תוכן אחרונים (נתונים לדוגמה)</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>שם הטיפול</th>
+                                <th>סוג שיער מתאים</th>
+                                <th>מצב</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>מסכת חמאת שיאה ולחות</td>
+                                <td>יבש / מתולתל</td>
+                                <td><span class="badge bg-success-subtle text-success">מפורסם</span></td>
+                            </tr>
+                            <tr>
+                                <td>שמן רוזמרין להזנת הקרקפת</td>
+                                <td>כל סוגי השיער</td>
+                                <td><span class="badge bg-warning-subtle text-dark">טיוטה</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {

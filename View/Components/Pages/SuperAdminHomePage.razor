@@ -1,13 +1,98 @@
 ﻿@page "/superadmin-home"
 @using View.Services
+@using View.Components.Shared
 @inject UserSession Session
 @inject NavigationManager Navigation
 
-@* מציגים את התוכן רק אם המשתמש מחובר והוא SuperAdmin *@
+<PageTitle>לוח בקרה ראשי · HairCare Match</PageTitle>
+
+@* דף ראשי למנהל מערכת ראשי (SuperAdmin): מציג תמונת מצב של האתר וקישורים לכל אפשרויות הניהול *@
 @if (Session.IsLoggedIn && Session.RoleName == "SuperAdmin")
 {
-    <h3>לוח בקרה - מנהל מערכת ראשי (SuperAdmin)</h3>
-    <p>ברוך הבא לניהול המערכת הראשי. מכאן ניתן לנהל משתמשים והרשאות[cite: 3].</p>
+    <div class="container py-4">
+        <div class="inner-page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="role-pill mb-2">מנהל מערכת ראשי · SuperAdmin</span>
+                    <h1 class="h3 inner-page-title">לוח בקרה ותמונת מצב של המערכת</h1>
+                    <p class="text-secondary mb-0">סקירה כללית של פעילות האתר וגישה מהירה לכל מסכי הניהול והדוחות.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/admin/users" class="btn btn-primary text-dark fw-semibold">ניהול משתמשים</a>
+                    <a href="/admin/reports" class="btn btn-outline-secondary">דוחות מערכת</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- תמונת מצב של האתר -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <DashboardCard Title="סה״כ משתמשים"
+                               Value="148"
+                               Description="משתמשים רשומים במערכת (נתוני דוגמה)."
+                               BadgeText="משתמשים"
+                               ActionText="רשימת משתמשים"
+                               ActionHref="/admin/users" />
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <DashboardCard Title="מנהלי תוכן"
+                               Value="5"
+                               Description="צוות ניהול הטיפולים והתוכן באתר."
+                               BadgeText="תפקידים"
+                               ActionText="הרשאות ומשתמשים"
+                               ActionHref="/admin/users" />
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <DashboardCard Title="פריטי תוכן פעילים"
+                               Value="64"
+                               Description="טיפולים, מדריכים והמלצות מפורסמים."
+                               BadgeText="תוכן"
+                               ActionText="ניהול תוכן"
+                               ActionHref="/content/treatments" />
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <DashboardCard Title="דוחות ופעילות"
+                               Value="19"
+                               Description="פעולות ניהול אחרונות וסטטיסטיקות שימוש."
+                               BadgeText="דוחות"
+                               ActionText="פתיחת דוחות"
+                               ActionHref="/admin/reports" />
+            </div>
+        </div>
+
+        <!-- פעילות אחרונה לדוגמה -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3" style="color: #4a3e4e;">פעילות ניהול אחרונה (נתונים לדוגמה)</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>זמן</th>
+                                <th>פעולה</th>
+                                <th>מבצע</th>
+                                <th>סטטוס</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>היום, 10:15</td>
+                                <td>עדכון הרשאת משתמש</td>
+                                <td>SuperAdmin</td>
+                                <td><span class="badge bg-success-subtle text-success">בוצע</span></td>
+                            </tr>
+                            <tr>
+                                <td>אתמול, 18:40</td>
+                                <td>הוספת טיפול חדש לקטלוג</td>
+                                <td>ContentManager</td>
+                                <td><span class="badge bg-info-subtle text-dark">מפורסם</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
