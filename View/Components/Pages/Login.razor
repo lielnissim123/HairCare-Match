@@ -1,6 +1,10 @@
 ﻿@page "/login"
 @inject NavigationManager Navigation
 @using View.Components.Shared
+@using System.Net
+@using Model
+@inject HttpClient Http
+@inject UserSession Session
 
 <PageTitle>התחברות · HairCare Match</PageTitle>
 
@@ -65,9 +69,65 @@
         }
 
         isBusy = true;
-        await Task.Delay(800); // סימולציית בדיקה
-        isBusy = false;
+        try
+        {
+            // שולחים לבקר את שם המשתמש והסיסמה. הבקר מפעיל את השאילתה שבודקת שהם מתאימים
+            User credentials = new User { Username = username.Trim(), Password = password };
+            HttpResponseMessage response = await Http.PostAsJsonAsync("api/users/login", credentials);
 
-        Navigation.NavigateTo("");
+            // קוד 401 אומר שהשם או הסיסמה שגויים
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                errorMessage = "שם המשתמש או הסיסמה שגויים.";
+                return;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = "הכניסה נכשלה. נסו שוב.";
+                return;
+            }
+
+            // הכניסה הצליחה: הבקר החזיר את המשתמש עם התפקיד שלו, והוא מומר אוטומטית לעצם
+            User? user = await response.Content.ReadFromJsonAsync<User>();
+            if (user == null)
+            {
+                errorMessage = "הכניסה נכשלה. נסו שוב.";
+                return;
+            }
+
+            // שומרים את המשתמש בשירות. מכאן כל הדפים יודעים מי מחובר
+            Session.Login(user);
+            await Session.SaveToStorageAsync(user); // הוספה: שמירה גם באחסון הדפדפן
+        }
+        catch (HttpRequestException)
+        {
+            // הבקשה לא הגיעה לשרת: למשל, שכבת השירות לא פועלת
+            errorMessage = "השרת לא זמין כרגע. נסו שוב בעוד רגע.";
+            return;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+
+
+        // מעבר לדף הראשי המתאים לפי תפקיד המשתמש המחובר
+        if (Session.RoleName == "SuperAdmin")
+        {
+            Navigation.NavigateTo("/superadmin-home");
+        }
+        else if (Session.RoleName == "ContentManager")
+        {
+            Navigation.NavigateTo("/contentmanager-home");
+        }
+        else if (Session.RoleName == "User")
+        {
+            Navigation.NavigateTo("/user-home");
+        }
+        else
+        {
+            Navigation.NavigateTo("");
+        }
     }
 }

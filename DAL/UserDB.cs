@@ -18,6 +18,10 @@ namespace DAL
             this.connectionString = connectionString;
         }
 
+        /// <summary>
+        /// הוספת משתמש חדש. מזהה התפקיד נמצא לפי שם התפקיד
+        /// </summary>
+        /// <returns>המזהה שבסיס הנתונים נתן למשתמש החדש</returns>
         public async Task<int> AddUserAsync(User user, string roleName = "User")
         {
             string sql = @"
@@ -31,7 +35,7 @@ namespace DAL
             using var command = new MySqlCommand(sql, connection);
             command.Parameters.AddWithValue("@Username", user.Username);
             command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@Password", user.Password);
+            command.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(user.Password));
             command.Parameters.AddWithValue("@RoleName", roleName);
 
             int rows = await command.ExecuteNonQueryAsync();
@@ -43,6 +47,7 @@ namespace DAL
             return user.Id;
         }
 
+        /// בדיקה אם שם משתמש כבר תפוס
         public async Task<bool> UsernameExistsAsync(string username)
         {
             string sql = "SELECT EXISTS(SELECT 1 FROM Users WHERE Username = @Username);";
@@ -55,6 +60,7 @@ namespace DAL
             return Convert.ToInt64(await command.ExecuteScalarAsync()) == 1;
         }
 
+        /// בדיקה אם אימייל כבר תפוס
         public async Task<bool> EmailExistsAsync(string email)
         {
             string sql = "SELECT EXISTS(SELECT 1 FROM Users WHERE Email = @Email);";
@@ -67,6 +73,9 @@ namespace DAL
             return Convert.ToInt64(await command.ExecuteScalarAsync()) == 1;
         }
 
+
+        /// בדיקת התחברות
+        /// <returns>המשתמש אם השם והסיסמה נכונים, אחרת ערך ריק</returns>
         public async Task<User?> CheckLoginAsync(string username, string password)
         {
             string sql = SelectUserSql + " WHERE u.Username = @Username;";
@@ -82,9 +91,11 @@ namespace DAL
 
             User user = ReadUser(reader);
 
-            return user.Password == password ? user : null;
+            return BCrypt.Net.BCrypt.Verify(password, user.Password) ? user : null;
         }
 
+        /// שליפת משתמש לפי מזהה
+        /// <returns>המשתמש, או ערך ריק אם לא נמצא</returns>
         public async Task<User?> GetUserByIdAsync(int userId)
         {
             string sql = SelectUserSql + " WHERE u.UserID = @UserID;";
@@ -98,6 +109,7 @@ namespace DAL
             return await reader.ReadAsync() ? ReadUser(reader) : null;
         }
 
+        /// שליפת כל המשתמשים עם שם התפקיד, ממוינים לפי שם משתמש
         public async Task<List<User>> GetAllUsersAsync()
         {
             string sql = SelectUserSql + " ORDER BY u.Username;";
@@ -114,6 +126,7 @@ namespace DAL
             return users;
         }
 
+        /// ספירת משתמשים לכל תפקיד.
         public async Task<Dictionary<string, int>> CountUsersByRoleAsync()
         {
             string sql = @"
@@ -135,6 +148,7 @@ namespace DAL
             return counts;
         }
 
+        /// שינוי תפקיד של משתמש, לפי שם התפקיד החדש
         public async Task<bool> UpdateUserRoleAsync(int userId, string roleName)
         {
             string sql = @"
@@ -152,6 +166,7 @@ namespace DAL
             return await command.ExecuteNonQueryAsync() > 0;
         }
 
+        /// עדכון סיסמה
         public async Task<bool> UpdatePasswordAsync(int userId, string newPassword)
         {
             string sql = "UPDATE Users SET PasswordHash = @Password WHERE UserID = @UserID;";
@@ -159,12 +174,13 @@ namespace DAL
             using var connection = new MySqlConnection(connectionString);
             await connection.OpenAsync();
             using var command = new MySqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@Password", newPassword);
+            command.Parameters.AddWithValue("@Password", BCrypt.Net.BCrypt.HashPassword(newPassword));
             command.Parameters.AddWithValue("@UserID", userId);
 
             return await command.ExecuteNonQueryAsync() > 0;
         }
 
+        /// עדכון אימייל. אם האימייל כבר שייך למשתמש אחר, בסיס הנתונים יזרוק שגיאה, כי העמודה מוגדרת ייחודית
         public async Task<bool> UpdateEmailAsync(int userId, string newEmail)
         {
             string sql = "UPDATE Users SET Email = @Email WHERE UserID = @UserID;";
@@ -178,6 +194,7 @@ namespace DAL
             return await command.ExecuteNonQueryAsync() > 0;
         }
 
+        /// מחיקת משתמש. 
         public async Task<bool> DeleteUserAsync(int userId)
         {
             string sql = "DELETE FROM Users WHERE UserID = @UserID;";

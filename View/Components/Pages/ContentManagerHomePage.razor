@@ -1,0 +1,54 @@
+﻿@page "/contentmanager-home"
+@using View.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+@* מציגים את התוכן רק אם המשתמש מחובר והוא ContentManager *@
+@if (Session.IsLoggedIn && Session.RoleName == "ContentManager")
+{
+    <h3>ניהול תוכן - מנהל תוכן (ContentManager)</h3>
+    <p>ברוך הבא לניהול התוכן. מכאן ניתן להוסיף, לערוך ולאשר טיפולים וביקורות[cite: 3].</p>
+}
+
+@code {
+    // בדיקת הרשאות בעת טעינת הדף בתצוגה
+    // protected override void OnInitialized()
+    // {
+    //     אם אין משתמש מחובר, מעבירים לדף הכניסה
+    //     if (!Session.IsLoggedIn)
+    //     {
+    //         Navigation.NavigateTo("/login");
+    //         return;
+    //     }
+
+    //     אם המשתמש מחובר אבל התפקיד אינו ContentManager, מעבירים לדף אין הרשאה
+    //     if (Session.RoleName != "ContentManager")
+    //     {
+    //         Navigation.NavigateTo("/unauthorized");
+    //         return;
+    //     }
+    // }
+
+    // הוספה בתוך @code של הדף המוגן:
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync(); // הוספה: שחזור משתמש אחרי ריענון/הקלדת כתובת
+
+            if (!Session.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (Session.RoleName != "ContentManager") 
+            {
+                Navigation.NavigateTo("/unauthorized");
+                return;
+            }
+
+            StateHasChanged(); // הוספה: הצגת התוכן לאחר טעינת המשתמש
+        }
+    }
+}

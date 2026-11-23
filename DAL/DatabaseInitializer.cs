@@ -15,7 +15,47 @@ namespace DAL
 
             await CreateTablesAsync(dbConnectionString);
             await SeedRolesAsync(dbConnectionString);
+            await SeedUsersAsync(dbConnectionString);
+
+            Console.WriteLine("[DB] Initialization finished, the server is ready for requests");
         }
+
+        private static async Task SeedUsersAsync(string dbConnectionString)
+        {
+            using var connection = new MySqlConnection(dbConnectionString);
+            await connection.OpenAsync();
+
+            // בדיקה אם הטבלה ריקה, בדיוק כמו בטבלת התפקידים
+            string checkSql = "SELECT COUNT(*) FROM Users;";
+            using var checkCmd = new MySqlCommand(checkSql, connection);
+            long count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
+            if (count > 0)
+            {
+                Console.WriteLine($"[DB] Users table already has {count} users, no seed users added");
+                return;
+            }
+
+            await InsertSeedUserAsync(connection, "admin", "admin@example.com", "admin", "SuperAdmin");
+            await InsertSeedUserAsync(connection, "content", "content@example.com", "content", "ContentManager");
+            await InsertSeedUserAsync(connection, "user", "user@example.com", "user", "User");
+            Console.WriteLine("[DB] Seed users added");
+        }
+
+        private static async Task InsertSeedUserAsync(MySqlConnection connection,
+            string username, string email, string password, string roleName)
+        {
+            string insertSql = @"
+                INSERT INTO Users (Username, Email, PasswordHash, RoleID)
+                VALUES (@Username, @Email, @Hash, (SELECT RoleID FROM Roles WHERE RoleName = @RoleName));";
+
+            using var command = new MySqlCommand(insertSql, connection);
+            command.Parameters.AddWithValue("@Username", username);
+            command.Parameters.AddWithValue("@Email", email);
+            command.Parameters.AddWithValue("@Hash", BCrypt.Net.BCrypt.HashPassword(password));
+            command.Parameters.AddWithValue("@RoleName", roleName);
+            await command.ExecuteNonQueryAsync();
+        }
+
 
         private static async Task CreateDatabaseAsync(string serverConnectionString)
         {

@@ -13,12 +13,19 @@
     <link rel="stylesheet" href="css/site.css" />
 
     <link rel="stylesheet" href="HairCareMatch.styles.css" />
-    <HeadOutlet />
+
+    <link rel="icon" type="image/jpeg" href="images/logoHairCare.jpeg" />
+    <HeadOutlet @rendermode="pageRenderMode" />
 </head>
 
 <body>
-    <Routes />
+    <Routes @rendermode="pageRenderMode" />
     <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>
+
+@code {
+    private static readonly IComponentRenderMode pageRenderMode =
+    new InteractiveServerRenderMode(prerender: false);
+}

@@ -1,5 +1,10 @@
 ﻿@using View.Components.Shared
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject UserSession Session
+@inject NavigationManager Navigation
+@using View.Services
+
 
 <div class="page" dir="rtl">
     <!-- סרגל עליון צמוד למעלה -->
@@ -8,11 +13,21 @@
             <!-- הלוגו המשותף שלנו -->
             <Logo />
 
-            <!-- קישורי הניווט -->
-            <nav class="nav gap-3 align-items-center">
-                <NavLink class="nav-link fw-semibold" href="" Match="NavLinkMatch.All" style="color: #4a3e4e;">דף הבית</NavLink>
-                <NavLink class="nav-link fw-semibold" href="login" style="color: #4a3e4e;">התחברות</NavLink>
-                <NavLink class="nav-link btn btn-primary px-3 text-dark fw-semibold" href="register">הרשמה</NavLink>
+            <nav class="d-flex gap-2 align-items-center">
+                @* נוסף בגרסה 6: אם יש משתמש מחובר, מציגים ברכה עם שם המשתמש שלו וכפתור יציאה.
+               אחרת מציגים "שלום, אורח" ואת שני הכפתורים לכניסה ולהרשמה *@
+                @if (Session.IsLoggedIn)
+                {
+                    <span class="fw-semibold">שלום, @Session.Username</span>
+                    <button class="btn btn-outline-primary" type="button" @onclick="Logout">יציאה</button>
+                }
+                else
+                {
+                    @* גולש שלא נכנס לחשבון מקבל ברכה כללית *@
+                    <span class="fw-semibold">שלום, אורח</span>
+                    <a class="btn btn-outline-primary" href="login">כניסה</a>
+                    <a class="btn btn-primary" href="register">הרשמה</a>
+                }
             </nav>
         </div>
     </header>
@@ -24,3 +39,31 @@
         </article>
     </main>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Session.OnChange += OnSessionChanged; // לאירוע נרשמים
+    }
+    private void OnSessionChanged()
+    {
+        InvokeAsync(StateHasChanged); // הסרגל את מעדכנים
+    }
+    private void Logout()
+    {
+        Session.Logout();
+        Navigation.NavigateTo("");
+    }
+    public void Dispose()
+    {
+        Session.OnChange -= OnSessionChanged; // ההרשמה את מבטלים
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync();
+        }
+    }
+}

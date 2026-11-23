@@ -6,7 +6,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+string apiBaseUrl = builder.Configuration["ApiBaseUrl"]
+              ?? throw new InvalidOperationException("ApiBaseUrl not found in appsettings.json.");
+
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+
+builder.Services.AddScoped<View.Services.UserSession>();
+
+// הוספה: שירות שמירת סשן בדפדפן כדי שהמשתמש יישאר מחובר גם בריענון
+builder.Services.AddScoped<Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage>();
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

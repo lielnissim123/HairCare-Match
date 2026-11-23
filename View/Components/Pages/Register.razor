@@ -1,6 +1,11 @@
 ﻿@page "/register"
 @inject NavigationManager Navigation
 @using View.Components.Shared
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Net.Mail
+@using Model
 
 <PageTitle>הרשמה · HairCare Match</PageTitle>
 
@@ -15,19 +20,25 @@
 
                     <form novalidate>
                         <!-- שדות הטופס באמצעות Field -->
-                        <Field Id="reg-fullname" Label="שם מלא" Name="fullname" @bind-Value="fullName" />
+                        <Field Id="reg-fullname" Label="שם מלא" Name="fullname" @bind-Value="username" />
                         <Field Id="reg-email" Label="כתובת אימייל" Name="email" Type="email" Dir="ltr" @bind-Value="email" />
                         <Field Id="reg-password" Label="סיסמה" Name="password" Type="password" Dir="ltr" @bind-Value="password" />
+                        <Field Id="reg-confirm" Label="אימות סיסמה" Name="confirmPassword" Type="password" Dir="ltr" @bind-Value="confirmPassword" />
 
                         <!-- הודעת שגיאה -->
                         @if (errorMessage != null)
                         {
                             <div class="alert alert-danger mt-3" role="alert">@errorMessage</div>
                         }
-
+                        @if (isRegistered)
+                        {
+                            <div class="alert alert-success" role="status">
+                                <strong>ההרשמה הצליחה!</strong> עוברים לדף הכניסה בעוד @secondsLeft שניות.
+                            </div>
+                        }
                         <!-- כפתור הרשמה -->
                         <button class="btn btn-primary btn-lg w-100 mt-3 text-dark fw-semibold" type="button"
-                                disabled="@isBusy" @onclick="RegisterAsync">
+                                disabled="@(isBusy || isRegistered)" @onclick="RegisterAsync">
                             @if (isBusy)
                             {
                                 <span>נרשמות...</span>
@@ -50,26 +61,92 @@
 </div>
 
 @code {
-    private string? fullName;
+    private string? username;
     private string? email;
     private string? password;
+    private string? confirmPassword;
+
     private string? errorMessage;
     private bool isBusy;
+    private bool isRegistered;
+    private int secondsLeft = 5;
 
     private async Task RegisterAsync()
     {
         errorMessage = null;
 
-        if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
         {
             errorMessage = "יש למלא את כל השדות.";
             return;
         }
 
-        isBusy = true;
-        await Task.Delay(800);
-        isBusy = false;
+        if (!MailAddress.TryCreate(email.Trim(), out _))
+        {
+            errorMessage = "כתובת האימייל לא תקינה.";
+            return;
+        }
 
+        if (password != confirmPassword)
+        {
+            errorMessage = "הסיסמה ואימות הסיסמה לא זהים.";
+            return;
+        }
+
+        isBusy = true;
+        try
+        {
+            // שלב 1, קריאה: בודקים ששם המשתמש והאימייל עוד לא קיימים.
+            // הערך מקודד לפני שהוא נכנס לכתובת, כדי שתווים מיוחדים לא ישברו אותה.
+            // הבקר מחזיר אמת או שקר, והתשובה מומרת אוטומטית לערך בוליאני
+            bool usernameExists = await Http.GetFromJsonAsync<bool>($"api/users/exists/{Uri.EscapeDataString(username.Trim())}");
+            if (usernameExists)
+            {
+                errorMessage = "שם המשתמש כבר תפוס. בחרו שם אחר.";
+                return;
+            }
+
+            bool emailExists = await Http.GetFromJsonAsync<bool>($"api/users/email-exists/{Uri.EscapeDataString(email.Trim())}");
+            if (emailExists)
+            {
+                errorMessage = "האימייל הזה כבר רשום במערכת.";
+                return;
+            }
+
+            // שלב 2, כתיבה: שולחים את המשתמש החדש לבקר, והוא שומר אותו בבסיס הנתונים.
+            // העצם מומר אוטומטית לפורמט של נתונים ברשת ונשלח בגוף הבקשה
+            User newUser = new User(username.Trim(), email.Trim(), password);
+            HttpResponseMessage response = await Http.PostAsJsonAsync("api/users", newUser);
+
+            // קוד מצב בטווח ההצלחה אומר שהמשתמש נשמר
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = "ההרשמה נכשלה. נסו שוב.";
+                return;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // הבקשה לא הגיעה לשרת: למשל, שכבת השירות לא פועלת
+            errorMessage = "השרת לא זמין כרגע. נסו שוב בעוד רגע.";
+            return;
+        }
+        finally
+        {
+            // הקטע הזה רץ תמיד, גם אחרי יציאה מהפעולה באמצע, כדי שהכפתור לא יישאר מושבת
+            isBusy = false;
+        }
+
+        // ההרשמה הצליחה: מציגים הודעה וסופרים לאחור. בכל שנייה הדף מתעדכן עם המספר החדש
+        isRegistered = true;
+        while (secondsLeft > 0)
+        {
+            StateHasChanged();
+            await Task.Delay(1000);
+            secondsLeft--;
+        }
+
+        // מעבר לדף הכניסה
         Navigation.NavigateTo("login");
     }
 }

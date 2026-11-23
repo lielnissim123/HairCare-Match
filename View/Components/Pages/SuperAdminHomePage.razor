@@ -1,0 +1,54 @@
+﻿@page "/superadmin-home"
+@using View.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+@* מציגים את התוכן רק אם המשתמש מחובר והוא SuperAdmin *@
+@if (Session.IsLoggedIn && Session.RoleName == "SuperAdmin")
+{
+    <h3>לוח בקרה - מנהל מערכת ראשי (SuperAdmin)</h3>
+    <p>ברוך הבא לניהול המערכת הראשי. מכאן ניתן לנהל משתמשים והרשאות[cite: 3].</p>
+}
+
+@code {
+    // בדיקת הרשאות בעת טעינת הדף בתצוגה
+    // protected override void OnInitialized()
+    // {
+    //     אם אין משתמש מחובר, מעבירים לדף הכניסה
+    //     if (!Session.IsLoggedIn)
+    //     {
+    //         Navigation.NavigateTo("/login");
+    //         return;
+    //     }
+
+    //     אם המשתמש מחובר אבל התפקיד אינו SuperAdmin, מעבירים לדף אין הרשאה
+    //     if (Session.RoleName != "SuperAdmin")
+    //     {
+    //         Navigation.NavigateTo("/unauthorized");
+    //         return;
+    //     }
+    // }
+
+    // הוספה בתוך @code של הדף המוגן:
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync(); // הוספה: שחזור משתמש אחרי ריענון/הקלדת כתובת
+
+            if (!Session.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (Session.RoleName != "SuperAdmin") 
+            {
+                Navigation.NavigateTo("/unauthorized");
+                return;
+            }
+
+            StateHasChanged(); // הוספה: הצגת התוכן לאחר טעינת המשתמש
+        }
+    }
+}

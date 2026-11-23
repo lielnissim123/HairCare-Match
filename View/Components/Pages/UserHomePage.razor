@@ -1,0 +1,54 @@
+﻿@page "/user-home"
+@using View.Services
+@inject UserSession Session
+@inject NavigationManager Navigation
+
+@* מציגים את התוכן רק אם המשתמש מחובר והוא User *@
+@if (Session.IsLoggedIn && Session.RoleName == "User")
+{
+    <h3>האזור האישי - משתמשת רשומה (User)</h3>
+    <p>ברוכה הבאה לאזור האישי שלך. כאן תמצאי פרופיל שיער, המלצות מותאמות וטיפולים שמורים[cite: 3].</p>
+}
+
+@code {
+    // בדיקת הרשאות בעת טעינת הדף בתצוגה
+    // protected override void OnInitialized()
+    // {
+    //     אם אין משתמש מחובר, מעבירים לדף הכניסה
+    //     if (!Session.IsLoggedIn)
+    //     {
+    //         Navigation.NavigateTo("/login");
+    //         return;
+    //     }
+
+    //     אם המשתמש מחובר אבל התפקיד אינו User, מעבירים לדף אין הרשאה
+    //     if (Session.RoleName != "User")
+    //     {
+    //         Navigation.NavigateTo("/unauthorized");
+    //         return;
+    //     }
+    // }
+
+    // הוספה בתוך @code של הדף המוגן:
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Session.LoadFromStorageAsync(); // הוספה: שחזור משתמש אחרי ריענון/הקלדת כתובת
+
+            if (!Session.IsLoggedIn)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (Session.RoleName != "User") 
+            {
+                Navigation.NavigateTo("/unauthorized");
+                return;
+            }
+
+            StateHasChanged(); // הוספה: הצגת התוכן לאחר טעינת המשתמש
+        }
+    }
+}
